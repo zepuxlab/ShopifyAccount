@@ -63,11 +63,8 @@ const clientId = () => {
 };
 
 const redirectUri = () => {
-  const u = import.meta.env.DEV
-    ? import.meta.env.SHOPIFY_OAUTH_REDIRECT_URI
-    : import.meta.env.SHOPIFY_OAUTH_REDIRECT_URI_PROD;
-  if (!u) throw new Error("Missing SHOPIFY_OAUTH_REDIRECT_URI");
-  return u;
+  if (typeof window === "undefined") throw new Error("redirectUri only in browser");
+  return `${window.location.origin}/callback`;
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {

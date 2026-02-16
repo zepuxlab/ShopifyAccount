@@ -1,9 +1,6 @@
 const getBackendUrl = (): string => {
-  const url = import.meta.env.DEV
-    ? import.meta.env.SHOPIFY_BACKEND_URL
-    : import.meta.env.SHOPIFY_BACKEND_URL_PROD;
-  if (!url) throw new Error("Missing SHOPIFY_BACKEND_URL");
-  return url.replace(/\/$/, "");
+  if (typeof window === "undefined") throw new Error("getBackendUrl only in browser");
+  return window.location.origin.replace(/\/$/, "");
 };
 
 export async function backendTokenExchange(code: string, codeVerifier: string, redirectUri: string) {
