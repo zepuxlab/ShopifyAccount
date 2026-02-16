@@ -72,6 +72,11 @@ export async function customerAccountGraphQL(accessToken, query, variables = {})
 }
 
 export async function getCustomerAccountToken(code, redirectUri, codeVerifier) {
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    throw new Error(
+      "SHOPIFY_CLIENT_ID and SHOPIFY_CLIENT_SECRET must be set in .env (OAuth app credentials from Dev Dashboard)"
+    );
+  }
   const config = await getOpenIdConfig();
   const tokenEndpoint = config.token_endpoint;
   const body = new URLSearchParams({
@@ -97,6 +102,11 @@ export async function getCustomerAccountToken(code, redirectUri, codeVerifier) {
 }
 
 export async function refreshCustomerToken(refreshToken) {
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    throw new Error(
+      "SHOPIFY_CLIENT_ID and SHOPIFY_CLIENT_SECRET must be set in .env (OAuth app credentials from Dev Dashboard)"
+    );
+  }
   const config = await getOpenIdConfig();
   const tokenEndpoint = config.token_endpoint;
   const body = new URLSearchParams({
