@@ -1,0 +1,37 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: shopify-account-backend
+    ports:
+      - "3601:3601"
+    environment:
+      NODE_ENV: production
+      PORT: 3601
+    env_file:
+      - ./backend/.env
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        ACT_SHOPIFY_STORE_ID: ${ACT_SHOPIFY_STORE_ID}
+        ACT_SHOPIFY_SHOP_DOMAIN: ${ACT_SHOPIFY_SHOP_DOMAIN}
+        ACT_SHOPIFY_CLIENT_ID: ${ACT_SHOPIFY_CLIENT_ID}
+        ACT_OAUTH_REDIRECT_URI: ${ACT_OAUTH_REDIRECT_URI:-http://localhost:5173/callback}
+        ACT_OAUTH_REDIRECT_URI_PROD: ${ACT_OAUTH_REDIRECT_URI_PROD:-https://account.ampriomilano.com/callback}
+        ACT_SHOPIFY_STOREFRONT_TOKEN: ${ACT_SHOPIFY_STOREFRONT_TOKEN}
+        ACT_SHOPIFY_API_VERSION: ${ACT_SHOPIFY_API_VERSION:-2024-01}
+        ACT_APP_URL: ${ACT_APP_URL:-http://localhost:5173}
+        ACT_APP_URL_PROD: ${ACT_APP_URL_PROD:-https://account.ampriomilano.com}
+        ACT_BACKEND_URL: ${ACT_BACKEND_URL:-http://localhost:3601}
+        ACT_BACKEND_URL_PROD: ${ACT_BACKEND_URL_PROD:-https://api.ampriomilano.com}
+    container_name: shopify-account-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
