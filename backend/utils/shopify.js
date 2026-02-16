@@ -10,7 +10,7 @@ const BASE_URL = `https://${SHOP_DOMAIN}`;
 let openidConfigCache = null;
 let customerAccountApiCache = null;
 
-async function getOpenIdConfig() {
+export async function getOpenIdConfig() {
   if (openidConfigCache) return openidConfigCache;
   const res = await fetch(`${BASE_URL}/.well-known/openid-configuration`);
   if (!res.ok) throw new Error("Failed to fetch OpenID configuration");
@@ -18,7 +18,7 @@ async function getOpenIdConfig() {
   return openidConfigCache;
 }
 
-async function getCustomerAccountApiConfig() {
+export async function getCustomerAccountApiConfig() {
   if (customerAccountApiCache) return customerAccountApiCache;
   const res = await fetch(`${BASE_URL}/.well-known/customer-account-api`);
   if (!res.ok) throw new Error("Failed to fetch Customer Account API config");
