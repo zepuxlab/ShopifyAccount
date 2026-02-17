@@ -14,6 +14,7 @@ import Addresses from "@/pages/account/Addresses";
 import PaymentMethods from "@/pages/account/PaymentMethods";
 import Reviews from "@/pages/account/Reviews";
 import AccountSettings from "@/pages/account/Settings";
+import Favorites from "@/pages/account/Favorites";
 import Login from "@/pages/Login";
 import Callback from "@/pages/Callback";
 import AppUi from "@/pages/AppUi";
@@ -44,6 +45,7 @@ const App = () => (
               >
                 <Route index element={<Orders />} />
                 <Route path="orders/:orderId" element={<OrderDetails />} />
+                <Route path="favorites" element={<Favorites />} />
                 <Route path="profile" element={<Profile />} />
                 <Route path="addresses" element={<Addresses />} />
                 <Route path="payment-methods" element={<PaymentMethods />} />

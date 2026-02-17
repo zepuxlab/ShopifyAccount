@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 
 const SHOP_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
-const ADMIN_TOKEN = process.env.SHOPIFY_ADMIN_API_TOKEN;
+const FALLBACK_ADMIN_TOKEN = process.env.SHOPIFY_ADMIN_API_TOKEN;
 const CLIENT_ID = process.env.SHOPIFY_CLIENT_ID;
 const CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET;
 const API_VERSION = process.env.SHOPIFY_API_VERSION || "2024-01";
@@ -9,6 +9,96 @@ const BASE_URL = `https://${SHOP_DOMAIN}`;
 
 let openidConfigCache = null;
 let customerAccountApiCache = null;
+let adminTokenCache = null;
+let adminTokenExpiresAt = 0;
+let storefrontTokenCache = null;
+
+export async function getAdminAccessToken() {
+  if (FALLBACK_ADMIN_TOKEN) {
+    return FALLBACK_ADMIN_TOKEN;
+  }
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    throw new Error(
+      "SHOPIFY_CLIENT_ID and SHOPIFY_CLIENT_SECRET must be set (or SHOPIFY_ADMIN_API_TOKEN)"
+    );
+  }
+  const now = Math.floor(Date.now() / 1000);
+  if (adminTokenCache && adminTokenExpiresAt > now + 60) {
+    return adminTokenCache;
+  }
+  const url = `${BASE_URL}/admin/oauth/access_token`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "client_credentials",
+      client_id: CLIENT_ID,
+      client_secret: CLIENT_SECRET,
+    }).toString(),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Admin token failed: ${res.status} ${text}`);
+  }
+  const data = await res.json();
+  adminTokenCache = data.access_token;
+  adminTokenExpiresAt = now + (data.expires_in ?? 86399);
+  return adminTokenCache;
+}
+
+export async function getStorefrontToken() {
+  if (storefrontTokenCache) {
+    return storefrontTokenCache;
+  }
+  const adminToken = await getAdminAccessToken();
+  const listUrl = `${BASE_URL}/admin/api/${API_VERSION}/storefront_access_tokens.json`;
+  const listRes = await fetch(listUrl, {
+    headers: { "X-Shopify-Access-Token": adminToken },
+  });
+  if (listRes.ok) {
+    const listData = await listRes.json();
+    const tokens = listData.storefront_access_tokens ?? listData.storefront_access_token ?? [];
+    const first = Array.isArray(tokens) ? tokens[0] : tokens;
+    if (first?.access_token) {
+      storefrontTokenCache = first.access_token;
+      return storefrontTokenCache;
+    }
+  }
+  const createMutation = `
+    mutation StorefrontAccessTokenCreate($input: StorefrontAccessTokenInput!) {
+      storefrontAccessTokenCreate(input: $input) {
+        userErrors { field message }
+        storefrontAccessToken { accessToken }
+      }
+    }
+  `;
+  const gqlRes = await fetch(`${BASE_URL}/admin/api/${API_VERSION}/graphql.json`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Access-Token": adminToken,
+    },
+    body: JSON.stringify({
+      query: createMutation,
+      variables: { input: { title: "Account App Storefront" } },
+    }),
+  });
+  if (!gqlRes.ok) {
+    const text = await gqlRes.text();
+    throw new Error(`Storefront token create failed: ${gqlRes.status} ${text}`);
+  }
+  const gqlData = await gqlRes.json();
+  const errs = gqlData?.data?.storefrontAccessTokenCreate?.userErrors;
+  if (errs?.length) {
+    throw new Error(errs.map((e) => e.message).join("; "));
+  }
+  const token = gqlData?.data?.storefrontAccessTokenCreate?.storefrontAccessToken?.accessToken;
+  if (!token) {
+    throw new Error("No storefront access token in response");
+  }
+  storefrontTokenCache = token;
+  return storefrontTokenCache;
+}
 
 export async function getOpenIdConfig() {
   if (openidConfigCache) return openidConfigCache;
@@ -26,23 +116,25 @@ export async function getCustomerAccountApiConfig() {
   return customerAccountApiCache;
 }
 
-export function adminRequest(path, options = {}) {
+export async function adminRequest(path, options = {}) {
+  const token = await getAdminAccessToken();
   const url = path.startsWith("http") ? path : `${BASE_URL}/admin/api/${API_VERSION}${path}`;
   const headers = {
     "Content-Type": "application/json",
-    "X-Shopify-Access-Token": ADMIN_TOKEN,
+    "X-Shopify-Access-Token": token,
     ...options.headers,
   };
   return fetch(url, { ...options, headers });
 }
 
 export async function adminGraphQL(query, variables = {}) {
+  const token = await getAdminAccessToken();
   const url = `${BASE_URL}/admin/api/${API_VERSION}/graphql.json`;
   const res = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Shopify-Access-Token": ADMIN_TOKEN,
+      "X-Shopify-Access-Token": token,
     },
     body: JSON.stringify({ query, variables }),
   });

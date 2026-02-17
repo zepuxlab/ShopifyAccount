@@ -5,7 +5,12 @@ import { authLimiter } from "./middleware/rateLimit.js";
 import { apiLimiter } from "./middleware/rateLimit.js";
 import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
-import { adminGraphQL, getOpenIdConfig, getCustomerAccountApiConfig } from "./utils/shopify.js";
+import {
+  adminGraphQL,
+  getOpenIdConfig,
+  getCustomerAccountApiConfig,
+  getStorefrontToken,
+} from "./utils/shopify.js";
 
 const app = express();
 const PORT = process.env.PORT || 3601;
@@ -37,6 +42,15 @@ app.get("/health", async (req, res) => {
 
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/admin", apiLimiter, adminRoutes);
+
+app.get("/api/storefront-token", apiLimiter, async (req, res) => {
+  try {
+    const token = await getStorefrontToken();
+    res.json({ token });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Failed to get storefront token" });
+  }
+});
 
 app.use((err, req, res, next) => {
   if (err.message === "Not allowed by CORS") {

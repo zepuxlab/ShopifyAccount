@@ -21,6 +21,7 @@ const AccountLayout = () => {
 
   const mainNavItems = [
     { to: "/account", label: t("nav.orders"), end: true },
+    { to: "/account/favorites", label: t("nav.favorites") },
     { to: "/account/reviews", label: t("nav.reviews") },
     { to: "/account/addresses", label: t("nav.addresses") },
   ];

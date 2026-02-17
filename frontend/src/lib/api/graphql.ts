@@ -111,13 +111,30 @@ export async function customerAccountQuery<T = unknown>(
   return data.data as T;
 }
 
+let storefrontTokenCache: string | null = null;
+
+async function getStorefrontTokenFromBackend(): Promise<string> {
+  if (storefrontTokenCache) return storefrontTokenCache;
+  const base = getBackendUrlPublic();
+  const res = await fetch(`${base}/api/storefront-token`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error || "Failed to get storefront token");
+  }
+  const data = await res.json();
+  if (!data?.token) throw new Error("No token in storefront-token response");
+  storefrontTokenCache = data.token;
+  return storefrontTokenCache;
+}
+
 export async function storefrontQuery<T = unknown>(
   query: string,
   variables: Record<string, unknown> = {}
 ): Promise<T> {
   const domain = import.meta.env.SHOPIFY_SHOP_DOMAIN;
-  const token = import.meta.env.SHOPIFY_STOREFRONT_TOKEN;
-  if (!domain || !token) throw new Error("Missing SHOPIFY_SHOP_DOMAIN or SHOPIFY_STOREFRONT_TOKEN");
+  if (!domain) throw new Error("Missing SHOPIFY_SHOP_DOMAIN");
+  const token =
+    import.meta.env.SHOPIFY_STOREFRONT_TOKEN ?? (await getStorefrontTokenFromBackend());
 
   const res = await fetch(`https://${domain}/api/2024-01/graphql.json`, {
     method: "POST",
