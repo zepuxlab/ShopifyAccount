@@ -1,21 +1,7 @@
 services:
-  backend:
+  app:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: shopify-account-backend
-    ports:
-      - "3601:3601"
-    environment:
-      NODE_ENV: production
-      PORT: 3601
-    env_file:
-      - ./.env
-    restart: unless-stopped
-
-  frontend:
-    build:
-      context: ./frontend
+      context: .
       dockerfile: Dockerfile
       args:
         SHOPIFY_STORE_ID: ${SHOPIFY_STORE_ID:-}
@@ -28,9 +14,9 @@ services:
         SHOPIFY_APP_URL_PROD: ${SHOPIFY_APP_URL_PROD:-https://account.ampriomilano.com}
         SHOPIFY_BACKEND_URL: ${SHOPIFY_BACKEND_URL:-http://localhost:3601}
         SHOPIFY_BACKEND_URL_PROD: ${SHOPIFY_BACKEND_URL_PROD:-https://account.ampriomilano.com}
-    container_name: shopify-account-frontend
+    container_name: shopify-account
     ports:
-      - "5173:80"
-    depends_on:
-      - backend
+      - "3600:80"
+    env_file:
+      - ./.env
     restart: unless-stopped
