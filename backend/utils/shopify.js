@@ -1,10 +1,9 @@
 import fetch from "node-fetch";
 
 const SHOP_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
-const FALLBACK_ADMIN_TOKEN = process.env.SHOPIFY_ADMIN_API_TOKEN;
 const CLIENT_ID = process.env.SHOPIFY_CLIENT_ID;
 const CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET;
-const API_VERSION = process.env.SHOPIFY_API_VERSION || "2024-01";
+const API_VERSION = process.env.SHOPIFY_API_VERSION || "2026-01";
 const BASE_URL = `https://${SHOP_DOMAIN}`;
 
 let openidConfigCache = null;
@@ -14,13 +13,8 @@ let adminTokenExpiresAt = 0;
 let storefrontTokenCache = null;
 
 export async function getAdminAccessToken() {
-  if (FALLBACK_ADMIN_TOKEN) {
-    return FALLBACK_ADMIN_TOKEN;
-  }
   if (!CLIENT_ID || !CLIENT_SECRET) {
-    throw new Error(
-      "SHOPIFY_CLIENT_ID and SHOPIFY_CLIENT_SECRET must be set (or SHOPIFY_ADMIN_API_TOKEN)"
-    );
+    throw new Error("SHOPIFY_CLIENT_ID and SHOPIFY_CLIENT_SECRET must be set");
   }
   const now = Math.floor(Date.now() / 1000);
   if (adminTokenCache && adminTokenExpiresAt > now + 60) {

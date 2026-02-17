@@ -133,10 +133,10 @@ export async function storefrontQuery<T = unknown>(
 ): Promise<T> {
   const domain = import.meta.env.SHOPIFY_SHOP_DOMAIN;
   if (!domain) throw new Error("Missing SHOPIFY_SHOP_DOMAIN");
-  const token =
-    import.meta.env.SHOPIFY_STOREFRONT_TOKEN ?? (await getStorefrontTokenFromBackend());
+  const token = await getStorefrontTokenFromBackend();
 
-  const res = await fetch(`https://${domain}/api/2024-01/graphql.json`, {
+  const version = import.meta.env.SHOPIFY_API_VERSION || "2026-01";
+  const res = await fetch(`https://${domain}/api/${version}/graphql.json`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
