@@ -167,17 +167,17 @@ export async function getCustomerAccountToken(code, redirectUri, codeVerifier) {
   const tokenEndpoint = config.token_endpoint;
   const body = new URLSearchParams({
     grant_type: "authorization_code",
-    client_id: CLIENT_ID,
     redirect_uri: redirectUri,
     code,
     code_verifier: codeVerifier,
   });
-  if (CLIENT_SECRET) {
-    body.append("client_secret", CLIENT_SECRET);
-  }
+  const basicAuth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
   const res = await fetch(tokenEndpoint, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Basic ${basicAuth}`,
+    },
     body: body.toString(),
   });
   if (!res.ok) {
@@ -198,14 +198,14 @@ export async function refreshCustomerToken(refreshToken) {
   const body = new URLSearchParams({
     grant_type: "refresh_token",
     refresh_token: refreshToken,
-    client_id: CLIENT_ID,
   });
-  if (CLIENT_SECRET) {
-    body.append("client_secret", CLIENT_SECRET);
-  }
+  const basicAuth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
   const res = await fetch(tokenEndpoint, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Basic ${basicAuth}`,
+    },
     body: body.toString(),
   });
   if (!res.ok) {
