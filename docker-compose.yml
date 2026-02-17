@@ -10,7 +10,7 @@ services:
       NODE_ENV: production
       PORT: 3601
     env_file:
-      - ./backend/.env
+      - ./.env
     restart: unless-stopped
 
   frontend:
@@ -18,17 +18,17 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        ACT_SHOPIFY_STORE_ID: ${ACT_SHOPIFY_STORE_ID}
-        ACT_SHOPIFY_SHOP_DOMAIN: ${ACT_SHOPIFY_SHOP_DOMAIN}
-        ACT_SHOPIFY_CLIENT_ID: ${ACT_SHOPIFY_CLIENT_ID}
-        ACT_OAUTH_REDIRECT_URI: ${ACT_OAUTH_REDIRECT_URI:-http://localhost:5173/callback}
-        ACT_OAUTH_REDIRECT_URI_PROD: ${ACT_OAUTH_REDIRECT_URI_PROD:-https://account.ampriomilano.com/callback}
-        ACT_SHOPIFY_STOREFRONT_TOKEN: ${ACT_SHOPIFY_STOREFRONT_TOKEN}
-        ACT_SHOPIFY_API_VERSION: ${ACT_SHOPIFY_API_VERSION:-2024-01}
-        ACT_APP_URL: ${ACT_APP_URL:-http://localhost:5173}
-        ACT_APP_URL_PROD: ${ACT_APP_URL_PROD:-https://account.ampriomilano.com}
-        ACT_BACKEND_URL: ${ACT_BACKEND_URL:-http://localhost:3601}
-        ACT_BACKEND_URL_PROD: ${ACT_BACKEND_URL_PROD:-https://api.ampriomilano.com}
+        SHOPIFY_STORE_ID: ${SHOPIFY_STORE_ID:-}
+        SHOPIFY_SHOP_DOMAIN: ${SHOPIFY_SHOP_DOMAIN:-}
+        SHOPIFY_CLIENT_ID: ${SHOPIFY_CLIENT_ID:-}
+        SHOPIFY_OAUTH_REDIRECT_URI: ${SHOPIFY_OAUTH_REDIRECT_URI:-http://localhost:5173/callback}
+        SHOPIFY_OAUTH_REDIRECT_URI_PROD: ${SHOPIFY_OAUTH_REDIRECT_URI_PROD:-https://account.ampriomilano.com/callback}
+        SHOPIFY_STOREFRONT_TOKEN: ${SHOPIFY_STOREFRONT_TOKEN:-}
+        SHOPIFY_API_VERSION: ${SHOPIFY_API_VERSION:-2024-01}
+        SHOPIFY_APP_URL: ${SHOPIFY_APP_URL:-http://localhost:5173}
+        SHOPIFY_APP_URL_PROD: ${SHOPIFY_APP_URL_PROD:-https://account.ampriomilano.com}
+        SHOPIFY_BACKEND_URL: ${SHOPIFY_BACKEND_URL:-http://localhost:3601}
+        SHOPIFY_BACKEND_URL_PROD: ${SHOPIFY_BACKEND_URL_PROD:-https://account.ampriomilano.com}
     container_name: shopify-account-frontend
     ports:
       - "5173:80"
