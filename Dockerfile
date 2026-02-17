@@ -36,7 +36,7 @@ RUN apk add --no-cache nginx
 WORKDIR /app
 COPY --from=frontend-builder /app/dist /app/frontend/dist
 COPY --from=backend-builder /app /app/backend
-COPY nginx-app.conf /etc/nginx/conf.d/default.conf
+COPY nginx-app.conf /etc/nginx/http.d/default.conf
 ENV NODE_ENV=production
 ENV PORT=3601
 EXPOSE 80
