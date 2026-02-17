@@ -36,10 +36,8 @@ RUN apk add --no-cache nginx
 WORKDIR /app
 COPY --from=frontend-builder /app/dist /app/frontend/dist
 COPY --from=backend-builder /app /app/backend
-COPY nginx-app.conf /etc/nginx/conf.d/shopify-account.conf
-COPY start.sh /app/start.sh
-RUN chmod +x /app/start.sh
+COPY nginx-app.conf /etc/nginx/conf.d/default.conf
 ENV NODE_ENV=production
 ENV PORT=3601
 EXPOSE 80
-CMD ["/app/start.sh"]
+CMD ["sh", "-c", "cd /app/backend && node server.js & exec nginx -g 'daemon off;'"]
