@@ -123,7 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authUrl.searchParams.set("client_id", clientId());
     authUrl.searchParams.set("response_type", "code");
     authUrl.searchParams.set("redirect_uri", redirectUri());
-    authUrl.searchParams.set("scope", "openid email https://api.customers.com/auth/customer.graphql");
+    authUrl.searchParams.set("scope", "openid email customer-account-api:full");
     authUrl.searchParams.set("state", state);
     authUrl.searchParams.set("code_challenge", challenge);
     authUrl.searchParams.set("code_challenge_method", "S256");
