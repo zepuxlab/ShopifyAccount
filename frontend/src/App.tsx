@@ -16,6 +16,7 @@ import Reviews from "@/pages/account/Reviews";
 import AccountSettings from "@/pages/account/Settings";
 import Login from "@/pages/Login";
 import Callback from "@/pages/Callback";
+import AppUi from "@/pages/AppUi";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
               <Route path="/" element={<Navigate to="/account" replace />} />
               <Route path="/login" element={<Login />} />
               <Route path="/callback" element={<Callback />} />
+              <Route path="/appui" element={<AppUi />} />
               <Route
                 path="/account"
                 element={
