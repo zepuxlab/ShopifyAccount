@@ -19,6 +19,13 @@ const startedAt = Date.now();
 app.use(express.json({ limit: "1mb" }));
 app.use(corsMiddleware);
 
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api/")) {
+    console.log("[req]", req.method, req.url);
+  }
+  next();
+});
+
 app.get("/health", async (req, res) => {
   const timestamp = new Date().toISOString();
   let adminApi = "error";

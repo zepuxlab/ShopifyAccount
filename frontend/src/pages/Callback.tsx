@@ -17,7 +17,8 @@ const Callback = () => {
 
     const base = typeof window !== "undefined" ? window.location.origin : "";
     if (base) {
-      fetch(`${base}/api/auth/callback-debug?hasCode=${!!code}&hasState=${!!state}&error=${error || ""}`).catch(() => {});
+      fetch(`${base}/api/auth/callback-debug?hasCode=${!!code}&hasState=${!!state}&error=${encodeURIComponent(error || "")}&from=callback`)
+        .catch(() => {});
     }
 
     if (!code) {

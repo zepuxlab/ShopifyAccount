@@ -9,6 +9,13 @@ const router = Router();
 
 const GID_CUSTOMER = /^gid:\/\/shopify\/Customer\/\d+$/;
 
+router.use((req, res, next) => {
+  console.log("[auth]", req.method, req.path, Object.keys(req.query).length ? req.query : "");
+  next();
+});
+
+router.get("/ping", (req, res) => res.json({ pong: true }));
+
 router.get("/callback-debug", (req, res) => {
   const { hasCode, hasState, error } = req.query;
   console.log("[auth] callback hit:", { hasCode, hasState, error: error || null });
