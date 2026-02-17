@@ -11,8 +11,14 @@ const Callback = () => {
   useEffect(() => {
     const code = searchParams.get("code");
     const state = searchParams.get("state");
+    const error = searchParams.get("error");
     const verifier = getStoredCodeVerifier();
     const savedState = getStoredState();
+
+    const base = typeof window !== "undefined" ? window.location.origin : "";
+    if (base) {
+      fetch(`${base}/api/auth/callback-debug?hasCode=${!!code}&hasState=${!!state}&error=${error || ""}`).catch(() => {});
+    }
 
     if (!code) {
       setError("Missing authorization code");

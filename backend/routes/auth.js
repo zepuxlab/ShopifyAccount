@@ -9,8 +9,15 @@ const router = Router();
 
 const GID_CUSTOMER = /^gid:\/\/shopify\/Customer\/\d+$/;
 
+router.get("/callback-debug", (req, res) => {
+  const { hasCode, hasState, error } = req.query;
+  console.log("[auth] callback hit:", { hasCode, hasState, error: error || null });
+  res.json({ ok: true });
+});
+
 router.post("/token", async (req, res) => {
   try {
+    console.log("[auth] token exchange request");
     const { code, codeVerifier, redirect_uri } = req.body;
     const verifier = codeVerifier ?? req.body.code_verifier;
     const redirectUri = redirect_uri ?? req.body.redirect_uri;
@@ -29,8 +36,10 @@ router.post("/token", async (req, res) => {
       return res.status(400).json({ error: "Invalid redirect_uri" });
     }
     const tokens = await getCustomerAccountToken(codeStr, redirectStr, String(verifier));
+    console.log("[auth] token exchange success");
     res.json(tokens);
   } catch (err) {
+    console.error("[auth] token exchange error:", err.message);
     res.status(400).json({ error: err.message || "Token exchange failed" });
   }
 });
